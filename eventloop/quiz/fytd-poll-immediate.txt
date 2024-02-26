@@ -17,7 +17,7 @@ In terms of the event loop, the order of execution for the provided code (`event
 
 Now, let's address the question:
 
-- **Will the order of execution change if the timeout is changed to 0? Why or why not?**
+- Will the order of execution change if the timeout is changed to 0? Why or why not?
 
    Yes, changing the timeout to 0 milliseconds will affect the order of execution. 
    When a timeout is set to 0, it means the callback will be executed as soon as possible, but after the current synchronous code has finished executing and the call stack is empty. 
