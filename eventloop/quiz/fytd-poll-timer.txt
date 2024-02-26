@@ -1,3 +1,24 @@
 - Explain the order of execution in terms of the event loop for eventloop/poll_timer.js.
 - Will the order of execution change if the delay in the while loop is changed from 10s to 150s? Why or why not?
 - Will the order of execution change if timeout is changed to 0? Why or why not?
+
+In terms of the event loop, the order of execution for the provided code (`eventloop/poll_timer.js`) is as follows:
+
+1. The `someAsyncOperation` function is called, initiating an asynchronous file read operation using `fs.readFile`.
+2. `setTimeout` is called with a delay of 100 milliseconds. This schedules a timer event.
+3. The event loop starts executing tasks from the call stack. It executes `someAsyncOperation`, passing a callback function to be executed when the file read operation completes.
+4. While the file read operation is in progress, the event loop continues to execute. However, since the file read operation is asynchronous and non-blocking, it doesn't wait for it to complete.
+5. Once the file read operation completes, its callback function is added to the task queue.
+6. The event loop picks up the callback function from the task queue and pushes it onto the call stack for execution.
+7. Inside the callback function:
+   - 'someAsyncOperation' is logged to the console.
+   - A while loop is executed, which artificially delays execution for approximately 10 milliseconds.
+8. After the while loop completes, the callback function finishes executing, and the call stack becomes empty.
+9. The event loop continues to check for pending tasks. Since the `setTimeout` timer has expired, its callback function is pushed onto the task queue.
+10. The event loop picks up the `setTimeout` callback function from the task queue and pushes it onto the call stack for execution.
+11. Inside the `setTimeout` callback function, the time elapsed since scheduling the timeout is calculated and logged to the console.
+
+
+- No, the order of execution will not change. The delay in the while loop affects only the duration of the artificial delay in the execution of the callback function passed to `someAsyncOperation`. However, since this delay is within the callback function, it doesn't affect the scheduling or execution of other tasks or the `setTimeout` callback.
+
+- Yes, changing the timeout to 0 milliseconds will affect the order of execution. When a timeout is set to 0, it means the callback will be executed as soon as possible, but after the current synchronous code has finished executing and the call stack is empty. Therefore, in this case, the `setTimeout` callback will be executed immediately after the completion of the current synchronous code (including the completion of the while loop inside the `someAsyncOperation` callback), potentially before the completion of the file read operation.

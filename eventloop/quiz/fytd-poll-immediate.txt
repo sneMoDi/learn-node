@@ -1,2 +1,25 @@
 - Explain the order of execution in terms of the event loop for eventloop/immediate.js.
 - Will the order of execution change if timeout is changed to 0? Why or why not?
+
+In terms of the event loop, the order of execution for the provided code (`eventloop/immediate.js`) is as follows:
+
+1. `fs.readFile` is called, initiating an asynchronous file read operation.
+2. While waiting for the file read operation to complete, the event loop continues to execute.
+3. Once the file read operation completes, its callback function is added to the task queue.
+4. The event loop picks up the callback function from the task queue and pushes it onto the call stack for execution.
+5. Inside the callback function:
+   - A while loop is executed, artificially delaying the execution for approximately 10 milliseconds.
+   - If there was an error during the file read operation, 'Error' is logged to the console. Otherwise, the data read from the file is logged.
+   - A `setTimeout` callback is scheduled to run after 5 milliseconds.
+   - A `setImmediate` callback is scheduled to run immediately after the current callback function finishes executing.
+6. After the while loop completes and the callback function finishes executing, the call stack becomes empty.
+7. The event loop continues to check for pending tasks. Since both `setTimeout` and `setImmediate` have tasks to execute, they are picked up next.
+
+Now, let's address the question:
+
+- **Will the order of execution change if the timeout is changed to 0? Why or why not?**
+
+   Yes, changing the timeout to 0 milliseconds will affect the order of execution. 
+   When a timeout is set to 0, it means the callback will be executed as soon as possible, but after the current synchronous code has finished executing and the call stack is empty. 
+   Therefore, in this case, the `setTimeout` callback will be executed immediately after the current callback function finishes executing, potentially before the completion of the while loop inside the callback.
+   However, the `setImmediate` callback will still be scheduled to run immediately after the current callback function finishes executing, ensuring that it runs after the `setTimeout` callback.

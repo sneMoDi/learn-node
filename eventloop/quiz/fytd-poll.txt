@@ -1,1 +1,27 @@
 - In eventloop/poll.js, what will be the order of execution? Briefly explain the order of execution w.r.t the event loop phases.
+The order of execution for the given code is as follows:
+foo
+done
+Read Error
+1. `someAsyncOperation()` is called.
+2. Inside `someAsyncOperation`, a non-blocking operation `fs.readFile()` is initiated, which reads data from a file asynchronously. This operation is scheduled to run in the background, and the callback function provided to `fs.readFile()` will be executed once the file reading is complete.
+3. `foo()` is called.
+4. Inside `foo()`, 'foo' is logged to the console.
+5. 'done' is logged to the console.
+6. Eventually, the file reading operation initiated by `fs.readFile()` completes. Depending on the file system's speed and the size of the file, this may take some time.
+7. When the file reading operation is complete, its callback function is pushed onto the event queue.
+8. The event loop picks up the callback function from the event queue and pushes it onto the call stack.
+9. Inside the callback function:
+   - If there was an error during the file reading operation, 'Read Error' is logged to the console.
+   - Otherwise, 'Data: ' followed by the contents of the file is logged to the console.
+
+Explanation of the order of execution with respect to the event loop phases:
+
+- When `someAsyncOperation()` is called, it initiates an asynchronous operation (`fs.readFile()`), which is handled by the Node.js runtime and doesn't block the main thread.
+- `foo()` is called immediately after `someAsyncOperation()`.
+- Both `someAsyncOperation()` and `foo()` are synchronous functions, so they are executed one after the other on the main thread.
+- After `foo()` is called, 'done' is logged to the console.
+- Meanwhile, `fs.readFile()` is still running asynchronously in the background.
+- Once `fs.readFile()` completes, its callback function is pushed onto the event queue.
+- The event loop then picks up the callback function and pushes it onto the call stack for execution.
+- This mechanism ensures that even though `fs.readFile()` is asynchronous and doesn't block the main thread, its callback is executed when the operation completes, allowing non-blocking I/O operations in Node.js.

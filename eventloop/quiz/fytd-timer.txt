@@ -1,1 +1,25 @@
 - In eventloop/timer.js, what will be the order of execution? Briefly explain the order of execution w.r.t the event loop phases.
+
+The order of execution for the given code is as follows:
+
+1. `foo(2)` is called.
+2. Inside `foo` function:
+   - 'foo' is logged to the console.
+   - `setTimeout` is called with a callback function to execute `bar(a)` after a timeout of 0 milliseconds.
+   - `baz()` is called immediately.
+3. 'baz' is logged to the console.
+4. The event loop picks up the callback function from `setTimeout` and executes `bar(a)`.
+5. Inside `bar` function:
+   - `${x} : bar` is logged to the console with the value of `a`.
+6. `foo(1)` is called and the same sequence of steps (2-5) is repeated.
+
+Explanation of the order of execution with respect to the event loop phases:
+
+- When `foo` is called, it gets pushed to the call stack.
+- Inside `foo`, 'foo' is logged, `setTimeout` is called, and `baz()` is executed. Since `setTimeout` has a delay of 0 milliseconds, its callback function is scheduled to be executed after the current execution context finishes and the event loop has a chance to pick it up.
+- After logging 'foo' and calling `baz()`, `foo` finishes executing and is popped off the call stack.
+- The event loop picks up the callback function from `setTimeout` since it's completed its timeout period. The callback function (which logs `bar(a)`) is pushed onto the call stack and executed.
+- Once `bar(a)` finishes executing, it's popped off the call stack.
+- Finally, the event loop picks up the next task, which is the call to `foo(1)`, and the process repeats.
+
+So, the order of execution is 'foo', 'baz', 'bar(2)', 'foo', 'baz', 'bar(1)'.
